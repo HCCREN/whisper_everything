@@ -1,20 +1,16 @@
 import os
-from pydub import AudioSegment
 import torch
 import whisper
-
-# def m4a_to_wav(input_path, output_path):
-    # audio = AudioSegment.from_file(input_path, "m4a")
-    # audio.export(output_path, format="wav")
+from tqdm import tqdm  # Import the tqdm library
 
 def transcribe_audio_files(folder_path, model, output_folder):
-    # List all the files in the folder
-    file_names = [f for f in os.listdir(folder_path) if os.path.isfile(os.path.join(folder_path, f))]
+    # List all the files in the folder that are WAV files
+    file_names = [f for f in os.listdir(folder_path) if os.path.isfile(os.path.join(folder_path, f)) and f.endswith('.wav')]
+
+    # Initialize the progress bar
+    pbar = tqdm(total=len(file_names), desc="Transcribing audio files")
 
     for file_name in file_names:
-        if not file_name.endswith('.wav'):
-            continue  # Skip non-WAV files
-
         # Load audio
         audio_path = os.path.join(folder_path, file_name)
         audio = whisper.load_audio(audio_path)
@@ -26,19 +22,22 @@ def transcribe_audio_files(folder_path, model, output_folder):
         output_text_path = os.path.join(output_folder, f"{file_name.split('.')[0]}_transcription.txt")
         with open(output_text_path, 'w', encoding='utf-8') as f:
             f.write(text['text'])
+        
+        # Update the progress bar after each file is processed
+        pbar.update(1)
+
+    # Close the progress bar
+    pbar.close()
 
 # Check if CUDA is available and set the device accordingly
 device = "cuda" if torch.cuda.is_available() else "cpu"
 
 # Load the whisper model
-# My GPU is RTX3050 with 4GB VRAM, so the model can only use the "small" variant.
-model_size = "small"  # or "small", "medium", "large" depending on the model size you want to load 
+model_size = "small"  # Chosen for compatibility with the available GPU VRAM
 model = whisper.load_model(model_size).to(device)
 
-# Folder containing the audio segments
+# Folder paths
 input_folder = 'sound_data'
-
-# Output folder for the transcriptions
 output_folder = 'transcriptions'
 
 # Create the output folder if it doesn't exist
