@@ -5,7 +5,7 @@ from tqdm import tqdm  # Import the tqdm library
 
 def transcribe_audio_files(folder_path, model, output_folder):
     # List all the files in the folder that are WAV files
-    file_names = [f for f in os.listdir(folder_path) if os.path.isfile(os.path.join(folder_path, f)) and f.endswith('.wav')]
+    file_names = [f for f in os.listdir(folder_path) if os.path.isfile(os.path.join(folder_path, f)) and f.endswith('.mp3')]
 
     # Initialize the progress bar
     pbar = tqdm(total=len(file_names), desc="Transcribing audio files")
